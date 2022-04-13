@@ -1,24 +1,29 @@
 import streamlit as st
-import streamlit_book as stb
+from deta import Deta
 
-# Set wide display
-st.set_page_config(layout="wide")
+# Data to be written to Deta Base
+with st.form("form"):
+    name = st.text_input("Your name")
+    age = st.number_input("Your age")
+    submitted = st.form_submit_button("Store in database")
 
-# Set multipage
-save_answers = False
-stb.set_library_config(menu_title="App Title",
-                       menu_icon="apple",
-                       options=[
-                                "Intro",   
-                                "Multitest", 
-                                ], 
-                       paths=[
-                                "pages/Intro.py", 
-                                "pages/00 Multitest", 
-                            ],
-                       icons=[
-                                "tree", 
-                                "code", 
-                            ],
-                       save_answers=save_answers,
-                       )
+# Connect to Deta Base with your Project Key
+dk = "b0yjbay0_ThKk8bFHEbogVSdipT3wv2hWhfkHz7yr" #st.secrets["deta_key"]
+deta = Deta(dk)
+
+# Create a new database "example-db"
+# If you need a new database, just use another name.
+db = deta.Base("example-db")
+
+# If the user clicked the submit button,
+# write the data from the form to the database.
+# You can store any data you want here. Just modify that dictionary below (the entries between the {}).
+if submitted:
+    db.put({"name": name, "age": age})
+
+"---"
+"Here's everything stored in the database:"
+# This reads all items from the database and displays them to your app.
+# db_content is a list of dictionaries. You can do everything you want with it.
+db_content = db.fetch().items
+st.write(db_content)
